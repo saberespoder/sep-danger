@@ -59,3 +59,5 @@ end
 warn('Please squash and rebase your commits into one') if git.commits.count > 1
 
 warn("You've added no specs for this change. Are you sure about this?") if git.modified_files.grep(/spec/).empty?
+
+simplecov.report 'coverage/coverage.json'
