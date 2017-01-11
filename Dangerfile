@@ -45,10 +45,9 @@ if `grep -r "default_scope" app/`.length > 1
 end
 
 # We want to merge to master only from release branches
-if github.branch_for_base.eql?('master') && (!github.branch_for_head.start_with?('release_') || !github.branch_for_head.start_with?('asap'))
+if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?('release_') || github.branch_for_head.start_with?('asap'))
   fail 'Your trying to rebase into MASTER from non-release branch'
 end
-
 
 # Look for GIT merge conflicts
 if `grep -r ">>>>\|=======\|<<<<<<<" app spec lib`.length > 1
