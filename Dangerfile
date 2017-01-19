@@ -34,7 +34,9 @@ end
 
 # We don't need any debugging code in our codebase
 fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
-fail "Debugging code found - puts" if `grep -r puts lib/*/*.rb lib/*.rb app/ spec/`.length > 1
+fail "Debugging code found - puts" if github.pr_diff =~ /\bputs\b/
+fail "Debugging code found - p" if github.pr_diff =~ /\bp\b/
+fail "Debugging code found - pp" if github.pr_diff =~ /\bpp\b/
 fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
 fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
 fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
