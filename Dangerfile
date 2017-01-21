@@ -42,8 +42,8 @@ fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec
 fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
 
 # We don't need default_scope in our codebase
-if `grep -r "default_scope" app/`.length > 1
-  fail "default_scope found. Please avoid this bad practice ([why is bed](http://stackoverflow.com/a/25087337))"
+if github.pr_diff =~ /\bdefault_scope\b/
+  fail "default_scope found. Please avoid this bad practice ([why is bad](http://stackoverflow.com/a/25087337))"
 end
 
 # We want to merge to master only from release branches
