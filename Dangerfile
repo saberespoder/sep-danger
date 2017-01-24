@@ -21,28 +21,30 @@ if github.pr_body.length < 5
   fail "Please provide a summary in the Pull Request description"
 end
 
+added_lines = github.pr_diff.split("\n").select{ |line| line =~ /^\+/ }.join("\n")
+
 # Verify that we don't test implementation details
-if github.pr_diff =~ /expect\(assigns\(:.*\)/
+if added_lines =~ /expect\(assigns\(:.*\)/
   fail "Specs are testing implementation - assigns(:something) is used"
 end
-if github.pr_diff =~ /expect\(.*\).to respond_to\(:.*\)/
+if added_lines =~ /expect\(.*\).to respond_to\(:.*\)/
   warn "Specs are testing implementation - respond_to(:something) is used"
 end
-if github.pr_diff =~ /expect\(.*\).to receive\(:.*\)/
+if added_lines =~ /expect\(.*\).to receive\(:.*\)/
   warn "Specs are testing implementation - receive(:something) is used"
 end
 
 # We don't need any debugging code in our codebase
 fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
-fail "Debugging code found - puts" if github.pr_diff =~ /\bputs\b/
-fail "Debugging code found - p" if github.pr_diff =~ /\bp\b/
-fail "Debugging code found - pp" if github.pr_diff =~ /\bpp\b/
+fail "Debugging code found - puts" if added_lines =~ /^\s*puts\b/
+fail "Debugging code found - p" if added_lines =~ /^\s*p\b/
+fail "Debugging code found - pp" if added_lines =~ /^\s*pp\b/
 fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
 fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
 fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
 
 # We don't need default_scope in our codebase
-if github.pr_diff =~ /\bdefault_scope\b/
+if added_lines =~ /\bdefault_scope\b/
   fail "default_scope found. Please avoid this bad practice ([why is bad](http://stackoverflow.com/a/25087337))"
 end
 
