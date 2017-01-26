@@ -37,11 +37,14 @@ end
 # We don't need any debugging code in our codebase
 fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
 fail "Debugging code found - puts" if added_lines =~ /^\s*puts\b/
-fail "Debugging code found - p" if added_lines =~ /^\s*p\b/
-fail "Debugging code found - pp" if added_lines =~ /^\s*pp\b/
+fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
+fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
 fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
 fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
 fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
+
+fail "Trailing whitespace" if added_lines =~ /\s$/
+fail "Missing EOL character in last line" if github.pr_diff =~ /No newline at end of file/
 
 # We don't need default_scope in our codebase
 if added_lines =~ /\bdefault_scope\b/
@@ -62,8 +65,6 @@ end
 if `grep -r "Date.today\|DateTime.now\|Time.now" app spec lib`.length > 1
   fail "Use explicit timezone -> https://github.com/saberespoder/officespace/blob/master/good_code.md#do-use"
 end
-
-warn('Please squash and rebase your commits into one') if git.commits.count > 1
 
 warn("You've added no specs for this change. Are you sure about this?") if git.modified_files.grep(/spec/).empty?
 
