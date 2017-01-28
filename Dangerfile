@@ -36,7 +36,7 @@ end
 
 # We don't need any debugging code in our codebase
 fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
-fail "Debugging code found - puts" if added_lines =~ /^\s*puts\b/
+fail "Debugging code found - puts" if added_lines =~ /^.\s*puts\b/
 fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
 fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
 fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
