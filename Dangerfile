@@ -72,7 +72,8 @@ if File.exist?('coverage/coverage.json')
 else
   fn = File.join(ENV.fetch('CIRCLE_ARTIFACTS', '.'), 'coverage/.last_run.json')
   if File.exist?(fn)
-    coverage = JSON.parse(File.read(coverage_path), symbolize_names: true)
+    require 'json'
+    coverage = JSON.parse(File.read(fn), symbolize_names: true)
     percent = coverage[:result][:covered_percent]
     message("Code coverage is at #{percent}%")
   else
