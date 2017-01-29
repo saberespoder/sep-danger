@@ -1,4 +1,6 @@
 # rubocop:disable all
+require "json"
+
 # Make it more obvious that a PR is a work in progress and shouldn't be merged yet
 if github.pr_title.include?("[WIP]") || github.pr_title.include?("[wip]") || github.pr_labels =~ /work in progress/
   warn("PR is classed as Work in Progress")
@@ -80,5 +82,19 @@ else
     message("Code coverage is at #{percent}%")
   else
     warn("Code coverage data not found") if `grep simplecov Gemfile`.length > 1
+  end
+end
+
+
+modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
+ruboreport = `rubocop --format=json #{modified_ruby_files.join(' ')}`
+JSON.load(ruboreport).fetch('files', []).each do |file|
+  file.fetch('offenses', []).each do |offense|
+    text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
+    if offense.fetch('severity') == 'convention'
+      warn text
+    else
+      fail text
+    end
   end
 end
