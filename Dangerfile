@@ -45,6 +45,7 @@ fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" li
 
 fail "Trailing whitespace" if added_lines =~ /\s$/
 fail "Missing EOL character in last line" if github.pr_diff =~ /No newline at end of file/
+fail "Use spaces instead of tabs for indenting" if added_lines =~ /\t/
 
 # We don't need default_scope in our codebase
 if added_lines =~ /\bdefault_scope\b/
