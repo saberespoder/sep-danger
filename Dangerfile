@@ -67,4 +67,16 @@ warn('Please squash and rebase your commits into one') if git.commits.count > 1
 
 warn("You've added no specs for this change. Are you sure about this?") if git.modified_files.grep(/spec/).empty?
 
-simplecov.report 'coverage/coverage.json'
+if File.exist?('coverage/coverage.json')
+  simplecov.report 'coverage/coverage.json'
+else
+  fn = File.join(ENV.fetch('CIRCLE_ARTIFACTS', '.'), 'coverage/.last_run.json')
+  if File.exist?(fn)
+    require 'json'
+    coverage = JSON.parse(File.read(fn), symbolize_names: true)
+    percent = coverage[:result][:covered_percent]
+    message("Code coverage is at #{percent}%")
+  else
+    warn("Code coverage data not found") if `grep simplecov Gemfile`.length > 1
+  end
+end
