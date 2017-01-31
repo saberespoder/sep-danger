@@ -85,7 +85,7 @@ end
 
 modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
 unless modified_ruby_files.empty?
-  ruboreport = `rubocop --format=json #{modified_ruby_files.join(' ')}`
+  ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
   JSON.load(ruboreport).fetch('files', []).each do |file|
     file.fetch('offenses', []).each do |offense|
       text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
