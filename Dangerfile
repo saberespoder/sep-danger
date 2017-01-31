@@ -75,7 +75,6 @@ if File.exist?('coverage/coverage.json')
 else
   fn = File.join(ENV.fetch('CIRCLE_ARTIFACTS', '.'), 'coverage/.last_run.json')
   if File.exist?(fn)
-    require 'json'
     coverage = JSON.parse(File.read(fn), symbolize_names: true)
     percent = coverage[:result][:covered_percent]
     message("Code coverage is at #{percent}%")
@@ -84,16 +83,17 @@ else
   end
 end
 
-
 modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
-ruboreport = `rubocop --format=json #{modified_ruby_files.join(' ')}`
-JSON.load(ruboreport).fetch('files', []).each do |file|
-  file.fetch('offenses', []).each do |offense|
-    text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
-    if offense.fetch('severity') == 'convention'
-      warn text
-    else
-      fail text
+unless modified_ruby_files.empty?
+  ruboreport = `rubocop --format=json #{modified_ruby_files.join(' ')}`
+  JSON.load(ruboreport).fetch('files', []).each do |file|
+    file.fetch('offenses', []).each do |offense|
+      text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
+      if offense.fetch('severity') == 'convention'
+        warn text
+      else
+        fail text
+      end
     end
   end
 end
