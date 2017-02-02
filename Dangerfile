@@ -45,8 +45,7 @@ fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.len
 fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
 fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
 
-fail "Trailing whitespace" if added_lines =~ /\s$/
-fail "Missing EOL character in last line" if github.pr_diff =~ /No newline at end of file/
+warn "Trailing whitespace" if added_lines =~ /\s$/
 fail "Use spaces instead of tabs for indenting" if added_lines =~ /\t/
 
 # We don't need default_scope in our codebase
