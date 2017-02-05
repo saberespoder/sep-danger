@@ -85,10 +85,15 @@ end
 
 modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
 unless modified_ruby_files.empty?
+  pr_author_email = `git show --format='%ae' --no-patch HEAD`.strip
   ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
   JSON.load(ruboreport).fetch('files', []).each do |file|
     file.fetch('offenses', []).each do |offense|
-      text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
+      file = file.fetch('path')
+      line = offense.fetch('location', {}).fetch('line')
+      offense_email = `git blame '#{file}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/).captures.first
+      next if pr_author_email != offense_email
+      text = "Rubocop: #{offense.fetch('message')} in #{file}:#{line}"
       if offense.fetch('severity') == 'convention'
         warn text
       else
