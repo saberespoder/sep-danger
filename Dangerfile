@@ -83,3 +83,17 @@ else
     warn("Code coverage data not found") if `grep simplecov Gemfile`.length > 1
   end
 end
+
+
+modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
+ruboreport = `rubocop --format=json #{modified_ruby_files.join(' ')}`
+JSON.load(ruboreport).fetch('files', []).each do |file|
+  file.fetch('offenses', []).each do |offense|
+    text = "Rubocop: #{offense.fetch('message')} in #{file.fetch('path')}:#{offense.fetch('location', {}).fetch('line')}"
+    if offense.fetch('severity') == 'convention'
+      warn text
+    else
+      fail text
+    end
+  end
+end
