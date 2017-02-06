@@ -75,11 +75,31 @@ if File.exist?('coverage/coverage.json')
 else
   fn = File.join(ENV.fetch('CIRCLE_ARTIFACTS', '.'), 'coverage/.last_run.json')
   if File.exist?(fn)
-    require 'json'
     coverage = JSON.parse(File.read(fn), symbolize_names: true)
     percent = coverage[:result][:covered_percent]
     message("Code coverage is at #{percent}%")
   else
     warn("Code coverage data not found") if `grep simplecov Gemfile`.length > 1
+  end
+end
+
+modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
+unless modified_ruby_files.empty?
+  pr_author_email = `git show --format='%ae' --no-patch HEAD`.strip
+  ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
+  JSON.load(ruboreport).fetch('files', []).each do |file|
+    file.fetch('offenses', []).each do |offense|
+      file_name = file.fetch('path')
+      line = offense.fetch('location', {}).fetch('line')
+      message = offense.fetch('message', '').gsub(/\(http\S+?\)/, '([docs]\0)')
+      offense_email = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/).captures.first
+      next if pr_author_email != offense_email
+      text = "Rubocop: #{message} in `#{file_name}:#{line}`"
+      if offense.fetch('severity') == 'convention'
+        warn text
+      else
+        fail text
+      end
+    end
   end
 end
