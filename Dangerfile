@@ -89,11 +89,12 @@ unless modified_ruby_files.empty?
   ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
   JSON.load(ruboreport).fetch('files', []).each do |file|
     file.fetch('offenses', []).each do |offense|
-      file = file.fetch('path')
+      file_name = file.fetch('path')
       line = offense.fetch('location', {}).fetch('line')
-      offense_email = `git blame '#{file}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/).captures.first
+      message = offense.fetch('message', '').gsub(/\(http\S+?\)/, '([docs]\0)')
+      offense_email = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/).captures.first
       next if pr_author_email != offense_email
-      text = "Rubocop: #{offense.fetch('message')} in #{file}:#{line}"
+      text = "Rubocop: #{message} in `#{file_name}:#{line}`"
       if offense.fetch('severity') == 'convention'
         warn text
       else
