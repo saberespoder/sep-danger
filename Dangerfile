@@ -92,7 +92,9 @@ unless modified_ruby_files.empty?
       file_name = file.fetch('path')
       line = offense.fetch('location', {}).fetch('line')
       message = offense.fetch('message', '').gsub(/\(http\S+?\)/, '([docs]\0)')
-      offense_email = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/).captures.first
+      git_blame = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/)
+      next if git_blame.nil?
+      offense_email = git_blame.captures.first
       next if pr_author_email != offense_email
       text = "Rubocop: #{message} in `#{file_name}:#{line}`"
       if offense.fetch('severity') == 'convention'
