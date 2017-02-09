@@ -83,7 +83,7 @@ else
   end
 end
 
-modified_ruby_files = git.modified_files.grep(/\.rb$/).map{ |f| "'#{f}'" }
+modified_ruby_files = git.modified_files.grep(/\.rb$/).select{ |f| File.exist?(f) }.map{ |f| "'#{f}'" }
 unless modified_ruby_files.empty?
   pr_author_email = `git show --format='%ae' --no-patch HEAD`.strip
   ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
