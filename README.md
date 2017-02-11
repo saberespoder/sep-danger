@@ -1,4 +1,5 @@
 [![Dependency Status](https://gemnasium.com/badges/github.com/saberespoder/sep-danger.svg)](https://gemnasium.com/github.com/saberespoder/sep-danger)
+[![Build Status](https://travis-ci.org/saberespoder/sep-danger.svg?branch=master)](https://travis-ci.org/saberespoder/sep-danger)
 
 # Sep::Danger
 
