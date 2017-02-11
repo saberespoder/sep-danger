@@ -6,8 +6,8 @@ require 'sep/danger/version'
 Gem::Specification.new do |spec|
   spec.name          = "sep-danger"
   spec.version       = Sep::Danger::VERSION
-  spec.authors       = ["Anton Davydov"]
-  spec.email         = ["antondavydov.o@gmail.com"]
+  spec.authors       = ["SEP Geek Squad"]
+  spec.email         = ["tech@saberespoder.com"]
 
   spec.summary       = %q{Danger.systems conventions for SEP projects.}
   spec.description   = %q{Packages a Dangerfile to be used with Danger for SEP projects.}
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'danger', '~> 4.0.5'
+  spec.add_runtime_dependency 'danger', '~> 4.2'
   spec.add_runtime_dependency 'danger-rubocop'
   spec.add_runtime_dependency 'danger-simplecov_json'
 
