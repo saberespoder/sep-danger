@@ -58,6 +58,13 @@ if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?
   fail 'Your trying to rebase into MASTER from non-release branch'
 end
 
+# Warn if 'Gemfile' was modified and 'Gemfile.lock' was not
+if modified_files.include?("Gemfile")
+  if !modified_files.include?("Gemfile.lock")
+    warn("`Gemfile` was modified but `Gemfile.lock` was not")
+  end
+end
+
 # Look for GIT merge conflicts
 if `grep -r ">>>>\|=======\|<<<<<<<" app spec lib`.length > 1
  fail "Merge conflicts found"
