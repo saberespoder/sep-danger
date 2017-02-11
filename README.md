@@ -1,3 +1,5 @@
+[![Dependency Status](https://gemnasium.com/badges/github.com/saberespoder/sep-danger.svg)](https://gemnasium.com/github.com/saberespoder/sep-danger)
+
 # Sep::Danger
 
 This is based on Danger and helps us automate our code-reviews. Everything is very opionated and aimed only for Rails.
