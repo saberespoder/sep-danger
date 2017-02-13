@@ -8,3 +8,6 @@ Rake::TestTask.new(:test) do |t|
 end
 
 task :default => :test
+
+task "release", [:remote] => ["build", "release:guard_clean", "release:source_control_push"] do
+end
