@@ -92,17 +92,15 @@ end
 
 modified_ruby_files = git.modified_files.grep(/\.rb$/).select{ |f| File.exist?(f) }.map{ |f| "'#{f}'" }
 unless modified_ruby_files.empty?
-  pr_author_email = `git show --format='%ae' --no-patch HEAD`.strip
+  pr_commits = `git log HEAD  ^origin/#{github.branch_for_base} --format=format:%H`.split
   ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
   JSON.load(ruboreport).fetch('files', []).each do |file|
     file.fetch('offenses', []).each do |offense|
       file_name = file.fetch('path')
       line = offense.fetch('location', {}).fetch('line')
       message = offense.fetch('message', '').gsub(/\(http\S+?\)/, '([docs]\0)')
-      git_blame = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.match(/^author-mail <(.*)>/)
-      next if git_blame.nil?
-      offense_email = git_blame.captures.first
-      next if pr_author_email != offense_email
+      commit_introducing_fault = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.split[0]
+      next unless pr_commits.include?(commit_introducing_fault)
       text = "Rubocop: #{message} in `#{file_name}:#{line}`"
       if offense.fetch('severity') == 'convention'
         warn text
