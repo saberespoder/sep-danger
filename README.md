@@ -31,8 +31,8 @@ danger.import_dangerfile(gem: 'sep-danger')
 
 ## Releasing new version
 1. be sure to be in master branch
-2. Change version in versino file
-3. run make **rake master_release**
+2. Change version in version file
+3. run **rake master_release**
 
 Yes, it so simple!
 
