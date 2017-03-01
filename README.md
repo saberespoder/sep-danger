@@ -29,6 +29,12 @@ After you've added gem to Gemfile, just add Dangerfile to root of your project w
 danger.import_dangerfile(gem: 'sep-danger')
 ```
 
+## Releasing new version
+1. be sure to be in master branch
+2. Change version in versino file
+3. run make **rake master_release**
+
+Yes, it so simple!
 
 ## Development
 
