@@ -65,6 +65,11 @@ if modified_files.include?("Gemfile")
   end
 end
 
+# See https://github.com/saberespoder/sep-danger/issues/5
+if added_lines =~ /render\s.*?(&&|and)\s*return/
+  fail "Use `return render :foo` instead of render :foo && return"
+end
+
 # Look for GIT merge conflicts
 if `grep -r ">>>>\|=======\|<<<<<<<" app spec lib`.length > 1
  fail "Merge conflicts found"
