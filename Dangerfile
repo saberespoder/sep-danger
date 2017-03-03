@@ -59,8 +59,8 @@ if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?
 end
 
 # Warn if 'Gemfile' was modified and 'Gemfile.lock' was not
-if modified_files.include?("Gemfile")
-  if !modified_files.include?("Gemfile.lock")
+if git.modified_files.include?("Gemfile")
+  if !git.modified_files.include?("Gemfile.lock")
     warn("`Gemfile` was modified but `Gemfile.lock` was not")
   end
 end
@@ -88,6 +88,14 @@ else
   else
     warn("Code coverage data not found") if `grep simplecov Gemfile`.length > 1
   end
+end
+
+rspec_report = File.join(ENV.fetch('CIRCLE_TEST_REPORTS', '.'), 'rspec/rspec.xml')
+if File.exist?(rspec_report)
+  junit.parse rspec_report
+  junit.report
+else
+  warn "junit file not found in #{rspec_report}"
 end
 
 modified_ruby_files = git.modified_files.grep(/\.rb$/).select{ |f| File.exist?(f) }.map{ |f| "'#{f}'" }
