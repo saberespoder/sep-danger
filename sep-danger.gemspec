@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'danger', '~> 4.2'
   spec.add_runtime_dependency 'danger-rubocop'
+  spec.add_runtime_dependency 'danger-junit'
   spec.add_runtime_dependency 'danger-simplecov_json'
 
   spec.add_development_dependency "bundler", "~> 1.13"
