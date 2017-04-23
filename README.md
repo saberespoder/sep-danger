@@ -37,16 +37,14 @@ danger.import_dangerfile(gem: 'sep-danger')
 Yes, it so simple!
 
 ## Development
-Idea is to automate code review process to maximaise our time on discussion of what is really important.
+Automate code review process to maximize time on what matters.
 
 Ideas for this, could be found in:
 - Potential security checks -> https://github.com/brunofacca/zen-rails-security-checklist
 - Improving our transition to more Functionality Style coding - improve checks for immutable object and/or data.
 - Using ruby and rails best practices
 
-
-
-This project is being maintained by SEP Geek squad. We run multiple project to help immigrants at http://saberespoder.com 
+Lead maintainer for this project is @dvdbng
 
 
 ## License
