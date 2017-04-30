@@ -103,4 +103,4 @@ else
   warn "junit file not found in #{rspec_report}"
 end
 
-pronto.lint (modified_files + added_files)
+pronto.lint (git.modified_files + git.added_files)
