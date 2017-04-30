@@ -105,7 +105,7 @@ end
 
 
 `bundle exec pronto list`.split.each do |linter|
-  report = `bundle exec pronto run --commit origin/#{github.branch_for_base} -f json`
+  report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
   begin
     warnings = JSON.load(report)
   rescue
