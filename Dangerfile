@@ -103,15 +103,24 @@ else
   warn "junit file not found in #{rspec_report}"
 end
 
-files_to_check = git.modified_files + git.added_files
-max_warnings = 20
-pronto_warnings = pronto.offending_files(files_to_check)
-if pronto_warnings.empty?
-  message "Checked #{files_to_check.size} files with linters and it all looks good!"
-  fail `bundle exec pronto run`.inspect
-else
-  pronto_warnings.take(max_warnings).each do |warning|
-    warn "#{warning['message']} on #{warning['path']}:#{warning['line']}"
+
+`bundle exec pronto list`.split.each do |linter|
+  report = `bundle exec pronto run --commit origin/#{github.branch_for_base} -f json`
+  begin
+    warnings = JSON.load(report)
+  rescue
+    message "Linter #{linter} failed to run"
+    next
   end
-  fail "#{pronto_warnings.size - max_warnings} other linter warnings not displayed." if pronto_warnings.size > max_warnings
+
+  warnings.each do |w|
+    text = "#{linter}: #{w['message']} in `#{w['file_name']}:#{w['line']}`"
+    if w['level'] = 'W'
+      warn text
+    else
+      fail text
+    end
+  end
 end
+
+
