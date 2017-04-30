@@ -103,4 +103,15 @@ else
   warn "junit file not found in #{rspec_report}"
 end
 
-pronto.lint (git.modified_files + git.added_files)
+files_to_check = git.modified_files + git.added_files
+max_warnings = 20
+pronto_warnings = pronto.offending_files(files_to_check)
+if pronto_warnings.empty?
+  message "Checked #{files_to_check.size} files with linters and it all looks good!"
+  fail `bundle exec pronto run`.inspect
+else
+  pronto_warnings.take(max_warnings).each do |warning|
+    warn "#{warning['message']} on #{warning['path']}:#{warning['line']}"
+  end
+  fail "#{pronto_warnings.size - max_warnings} other linter warnings not displayed." if pronto_warnings.size > max_warnings
+end
