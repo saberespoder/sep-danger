@@ -1,0 +1,4 @@
+extends: airbnb-base
+plugins:
+  - import
+parser: typescript-eslint-parser
