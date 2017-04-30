@@ -103,11 +103,13 @@ else
   warn "junit file not found in #{rspec_report}"
 end
 
-
 system("cp -v --no-clobber #{__dir__}/linter_configs/.* .")
 system("cp -v --no-clobber #{__dir__}/linter_configs/* .")
-system("npm install")
-ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['path']}"
+
+Dir.chdir(__dir__) do
+  system("npm install")
+  ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['path']}"
+end
 
 `bundle exec pronto list`.split.each do |linter|
   report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
