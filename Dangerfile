@@ -106,14 +106,10 @@ end
 system("cp -v --no-clobber #{__dir__}/linter_configs/.* .")
 system("cp -v --no-clobber #{__dir__}/linter_configs/* .")
 
-system("cd #{__dir__} ; npm install")
-system("echo $PATH")
-system("cd #{__dir__} ; npm bin")
-ENV['PATH'] = "#{`cd #{__dir__} ; npm bin`.strip}:#{ENV['PATH']}"
-#Dir.chdir(__dir__) do
-#  ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['path']}"
-#  system("npm install")
-#end
+Dir.chdir(__dir__) do
+  system("npm install")
+  ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
+end
 
 `bundle exec pronto list`.split.each do |linter|
   report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
