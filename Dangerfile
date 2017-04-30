@@ -104,6 +104,7 @@ else
 end
 
 
+system("cp -v --no-clobber #{__dir__}/linter_configs/.* .")
 system("cp -v --no-clobber #{__dir__}/linter_configs/* .")
 system("npm install -g eslint typescript-eslint-parser stylelint")
 
