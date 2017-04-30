@@ -116,6 +116,7 @@ system("npm install -g eslint typescript-eslint-parser stylelint")
     next
   end
 
+  message "Linter #{linter} reported no errors" if warnings.empty?
   warnings.each do |w|
     text = "#{linter}: #{w['message']} in `#{w['file_name']}:#{w['line']}`"
     if w['level'] = 'W'
