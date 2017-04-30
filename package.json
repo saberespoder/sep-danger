@@ -1,0 +1,27 @@
+{
+  "name": "sep-danger",
+  "version": "1.0.0",
+  "description": "[![Dependency Status](https://gemnasium.com/badges/github.com/saberespoder/sep-danger.svg)](https://gemnasium.com/github.com/saberespoder/sep-danger) [![Build Status](https://travis-ci.org/saberespoder/sep-danger.svg?branch=master)](https://travis-ci.org/saberespoder/sep-danger)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saberespoder/sep-danger.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saberespoder/sep-danger/issues"
+  },
+  "homepage": "https://github.com/saberespoder/sep-danger#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-plugin-import": "^2.2.0"
+  }
+}
