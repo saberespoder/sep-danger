@@ -107,7 +107,7 @@ end
 system("cp -v --no-clobber #{__dir__}/linter_configs/.* .")
 system("cp -v --no-clobber #{__dir__}/linter_configs/* .")
 system("npm install")
-system("npm install -g eslint typescript-eslint-parser stylelint")
+ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['path']}"
 
 `bundle exec pronto list`.split.each do |linter|
   report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
