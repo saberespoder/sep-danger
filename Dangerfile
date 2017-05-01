@@ -152,6 +152,7 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
       payload = {
         channel: '@david',
         username: 'Review bot',
+        link_names: 1,
         text: ["@here Review time!",
                "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})",
                "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"].join("\n")
