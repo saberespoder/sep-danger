@@ -147,7 +147,7 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
   else
     unless is_wip || $had_big_fail || github.pr_labels =~ /review requested/i
       pr_url = github.pr_json['html_url']
-      github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review_requested'])
+      github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
       markdown "Issue https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})"
       payload = {
         channel: '@david',
