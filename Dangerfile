@@ -128,7 +128,7 @@ ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
 
   message "Linter #{linter} reported no errors" if warnings.empty?
   warnings.each do |w|
-    text = "#{linter}: #{w['message']} in `#{w['file_name']}:#{w['line']}`"
+    text = "#{linter}: #{w['message']} in `#{w['path']}:#{w['line']}`"
     if w['level'] = 'W'
       warn text
     else
