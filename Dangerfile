@@ -153,7 +153,6 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
       pr_url = github.pr_json['html_url']
       github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
       payload = {
-        channel: '@david',
         username: 'Review bot',
         link_names: 1,
         text: ["@here Review time!",
