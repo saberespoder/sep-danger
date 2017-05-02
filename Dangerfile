@@ -98,10 +98,13 @@ else
 end
 
 # Report failed tests
+tests_failed = false
 rspec_report = File.join(ENV.fetch('CIRCLE_TEST_REPORTS', '.'), 'rspec/rspec.xml')
 if File.exist?(rspec_report)
   junit.parse rspec_report
   junit.report
+  tests_failed = junit.failures.length > 0
+  message "Rspec: #{junit.tests.length} examples, #{junit.failures.length} failures, #{junit.skipped.length} skipped"
 else
   warn "junit file not found in #{rspec_report}"
 end
@@ -145,10 +148,10 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
   rescue
     message "Can't find issue #{issue_number}"
   else
-    unless is_wip || $had_big_fail || github.pr_labels =~ /review requested/i
+    markdown "Issue https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})"
+    unless is_wip || $had_big_fail || tests_failed || github.pr_labels =~ /review requested/i
       pr_url = github.pr_json['html_url']
       github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
-      markdown "Issue https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})"
       payload = {
         channel: '@david',
         username: 'Review bot',

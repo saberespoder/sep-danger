@@ -29,6 +29,17 @@ After you've added gem to Gemfile, just add Dangerfile to root of your project w
 danger.import_dangerfile(gem: 'sep-danger')
 ```
 
+## Features
+- Run linters on the code diff using [pronto](https://github.com/mmozuras/pronto). By default the following linters are included:
+  * [pronto-haml](https://github.com/mmozuras/pronto-haml)
+  * [pronto-rails_best_practices](https://github.com/mmozuras/pronto-rails_best_practices)
+  * [pronto-rubocop](https://github.com/mmozuras/pronto-rubocop)
+  * [pronto-stylelint](https://github.com/kevinjalbert/pronto-stylelint) with the [standard stylelint config](https://github.com/stylelint/stylelint-config-standard)
+  * [pronto-eslint_npm](https://github.com/doits/pronto-eslint_npm) with typescript parser and the [AirBnB styleguide](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb)
+  Any other pronto linters you have installed will also be ran
+- Ask for review using slack webhook (use the `SLACK_REVIEW_WEBHOOK` env var) unless the PR is a WIP or tests failed
+- Link to issue in the pull request if the branch starts with an issue number (If you keep all issues in one repository, use the `DANGER_ISSUES_REPO` env variable)
+
 ## Releasing new version
 1. be sure to be in master branch
 2. Change version in version file
