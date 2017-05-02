@@ -1,56 +1,58 @@
 # rubocop:disable all
+
+# Helpers
 require "json"
 
-# Make it more obvious that a PR is a work in progress and shouldn't be merged yet
-if github.pr_title.include?("[WIP]") || github.pr_title.include?("[wip]") || github.pr_labels =~ /work in progress/
-  warn("PR is classed as Work in Progress")
-end
+ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
 
-# Warn when there is a big PR
-warn("Big PR") if git.lines_of_code > 400
-
-# Don't let testing shortcuts get into master by accident
-fail("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
-fail("fit left in tests") if `grep -r fit spec/ `.length > 1
-
-# Ensure a clean commits history
-if git.commits.any? { |c| c.message =~ /^Merge branch/ }
-  fail('Please rebase to get rid of the merge commits in this PR')
-end
-
-# Mainly to encourage writing up some reasoning about the PR
-if github.pr_body.length < 5
-  fail "Please provide a summary in the Pull Request description"
+$had_big_fail = false
+def big_fail(message)
+  # PR review in slack won't be requested if there was big fails
+  $had_big_fail = true
+  fail message
 end
 
 added_lines = github.pr_diff.split("\n").select{ |line| line =~ /^\+/ }.join("\n")
 
+
+# Make it more obvious that a PR is a work in progress and shouldn't be merged yet
+is_wip = !!(github.pr_title =~ /\bWIP\b/i) || !!(github.pr_labels =~ /work in progress/i)
+warn("PR is classed as Work in Progress") if is_wip
+
+# Warn when there is a big PR
+warn("Big PR") if git.lines_of_code > 400
+
+# PR needs rebasing
+big_fail("PR can't be merged yet, rebase needed") unless github.pr_json["mergeable"]
+
+# Don't let testing shortcuts get into master by accident
+big_fail("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
+big_fail("fit left in tests") if `grep -r fit spec/ `.length > 1
+
+# Mainly to encourage writing up some reasoning about the PR
+fail "Please provide a summary in the Pull Request description" if github.pr_body.length < 5
+
 # Verify that we don't test implementation details
-if added_lines =~ /expect\(assigns\(:.*\)/
-  fail "Specs are testing implementation - assigns(:something) is used"
-end
-if added_lines =~ /expect\(.*\).to respond_to\(:.*\)/
-  warn "Specs are testing implementation - respond_to(:something) is used"
-end
-if added_lines =~ /expect\(.*\).to receive\(:.*\)/
-  warn "Specs are testing implementation - receive(:something) is used"
-end
+warn "Specs are testing implementation - assigns(:something) is used"    if added_lines =~ /expect\(assigns\(:.*\)/
+warn "Specs are testing implementation - respond_to(:something) is used" if added_lines =~ /expect\(.*\).to respond_to\(:.*\)/
+warn "Specs are testing implementation - receive(:something) is used"    if added_lines =~ /expect\(.*\).to receive\(:.*\)/
 
 # We don't need any debugging code in our codebase
-fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
-fail "Debugging code found - puts" if added_lines =~ /^.\s*puts\b/
-fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
-fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
-fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
-fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
-fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
+warn "Debugging code found - puts" if added_lines =~ /^.\s*puts\b/
+big_fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
+big_fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
+big_fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
+big_fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
+big_fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
+big_fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
 
-warn "Trailing whitespace" if added_lines =~ /\s$/
+# White space conventions
+fail "Trailing whitespace" if added_lines =~ /\s$/
 fail "Use spaces instead of tabs for indenting" if added_lines =~ /\t/
 
 # We don't need default_scope in our codebase
 if added_lines =~ /\bdefault_scope\b/
-  fail "default_scope found. Please avoid this bad practice ([why is bad](http://stackoverflow.com/a/25087337))"
+  big_fail "default_scope found. Please avoid this bad practice ([why is bad](http://stackoverflow.com/a/25087337))"
 end
 
 # We want to merge to master only from release branches
@@ -59,29 +61,29 @@ if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?
 end
 
 # Warn if 'Gemfile' was modified and 'Gemfile.lock' was not
-if git.modified_files.include?("Gemfile")
-  if !git.modified_files.include?("Gemfile.lock")
-    warn("`Gemfile` was modified but `Gemfile.lock` was not")
-  end
+if git.modified_files.include?("Gemfile") && !git.modified_files.include?("Gemfile.lock")
+  warn("`Gemfile` was modified but `Gemfile.lock` was not")
 end
 
 # See https://github.com/saberespoder/sep-danger/issues/5
 if added_lines =~ /render\s.*?(&&|and)\s*return/
-  fail "Use `return render :foo` instead of render :foo && return"
+  big_fail "Use `return render :foo` instead of render :foo && return"
 end
 
 # Look for GIT merge conflicts
 if `grep -r ">>>>\|=======\|<<<<<<<" app spec lib`.length > 1
- fail "Merge conflicts found"
+ big_fail "Merge conflicts found"
 end
 
-## Look for timezone issues
+# Look for timezone issues
 if `grep -r "Date.today\|DateTime.now\|Time.now" app spec lib`.length > 1
-  fail "Use explicit timezone -> https://github.com/saberespoder/officespace/blob/master/good_code.md#do-use"
+  big_fail "Use explicit timezone -> https://github.com/saberespoder/officespace/blob/master/good_code.md#do-use"
 end
 
+# Encourage writing specs
 warn("You've added no specs for this change. Are you sure about this?") if git.modified_files.grep(/spec/).empty?
 
+# Code coverage metric
 if File.exist?('coverage/coverage.json')
   simplecov.report 'coverage/coverage.json'
 else
@@ -95,31 +97,69 @@ else
   end
 end
 
+# Report failed tests
+tests_failed = false
 rspec_report = File.join(ENV.fetch('CIRCLE_TEST_REPORTS', '.'), 'rspec/rspec.xml')
 if File.exist?(rspec_report)
   junit.parse rspec_report
   junit.report
+  tests_failed = junit.failures.length > 0
+  message "Rspec: #{junit.tests.length} examples, #{junit.failures.length} failures, #{junit.skipped.length} skipped"
 else
   warn "junit file not found in #{rspec_report}"
 end
 
-modified_ruby_files = git.modified_files.grep(/\.rb$/).select{ |f| File.exist?(f) }.map{ |f| "'#{f}'" }
-unless modified_ruby_files.empty?
-  pr_commits = `git log HEAD  ^origin/#{github.branch_for_base} --format=format:%H`.split
-  ruboreport = `rubocop --force-exclusion --format=json #{modified_ruby_files.join(' ')}`
-  JSON.load(ruboreport).fetch('files', []).each do |file|
-    file.fetch('offenses', []).each do |offense|
-      file_name = file.fetch('path')
-      line = offense.fetch('location', {}).fetch('line')
-      message = offense.fetch('message', '').gsub(/\(http\S+?\)/, '([docs]\0)')
-      commit_introducing_fault = `git blame '#{file_name}' --porcelain -L #{line},#{line}`.split[0]
-      next unless pr_commits.include?(commit_introducing_fault)
-      text = "Rubocop: #{message} in `#{file_name}:#{line}`"
-      if offense.fetch('severity') == 'convention'
-        warn text
-      else
-        fail text
-      end
+# Setup environment for the linters (copy configs, etc)
+system("
+  mv package.json package.json.bak
+  mv #{__dir__}/package.json .
+  npm install
+  mv package.json.bak package.json
+  cp -v --no-clobber #{__dir__}/linter_configs/.* #{__dir__}/linter_configs/* .
+")
+ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
+
+# Run linters
+`bundle exec pronto list`.split.each do |linter|
+  report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
+  begin
+    warnings = JSON.load(report)
+  rescue
+    message "Linter #{linter} failed to run"
+    next
+  end
+
+  message "Linter #{linter} reported no errors" if warnings.empty?
+  warnings.each do |w|
+    text = "#{linter}: #{w['message']} in `#{w['path']}:#{w['line']}`"
+    if w['level'] = 'W'
+      warn text
+    else
+      big_fail text
+    end
+  end
+end
+
+
+# Ask for reviews in slack
+if issue_number = github.branch_for_head[/^(\d+)_/, 1]
+  begin
+    issue_title = github.api.issue(ISSUES_REPO, issue_number).title
+  rescue
+    message "Can't find issue #{issue_number}"
+  else
+    markdown "Issue https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})"
+    unless is_wip || $had_big_fail || tests_failed || github.pr_labels =~ /review requested/i
+      pr_url = github.pr_json['html_url']
+      github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
+      payload = {
+        username: 'Review bot',
+        link_names: 1,
+        text: ["@here Review time!",
+               "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})",
+               "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"].join("\n")
+      }
+      system("curl -X POST --data-urlencode 'payload=#{payload.to_json}' '#{ENV["SLACK_REVIEW_WEBHOOK"]}'")
     end
   end
 end

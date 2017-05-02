@@ -1,0 +1,7 @@
+# Global haml lint configurations for all SEP projects
+# Can be overriden on a per-project basis
+
+linters:
+  LineLength:
+    max: 150
+
