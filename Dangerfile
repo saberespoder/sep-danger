@@ -16,7 +16,7 @@ added_lines = github.pr_diff.split("\n").select{ |line| line =~ /^\+/ }.join("\n
 
 
 # Make it more obvious that a PR is a work in progress and shouldn't be merged yet
-is_wip = !!(github.pr_title =~ /\bWIP\b/i) || !!(github.pr_labels =~ /work in progress/i)
+is_wip = !!(github.pr_title =~ /\bWIP\b/i) || !!(github.pr_labels.join =~ /work in progress/i)
 warn("PR is classed as Work in Progress") if is_wip
 
 # Warn when there is a big PR
@@ -120,7 +120,10 @@ system("
 ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
 
 # Run linters
-`bundle exec pronto list`.split.each do |linter|
+linters = `bundle exec pronto list`.split
+linters_no_errors = linters.dup
+
+linters.each do |linter|
   report = `bundle exec pronto run --runner #{linter} --commit origin/#{github.branch_for_base} -f json`
   begin
     warnings = JSON.load(report)
@@ -129,7 +132,8 @@ ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
     next
   end
 
-  message "Linter #{linter} reported no errors" if warnings.empty?
+  linters_no_errors.delete(linter) if warnings.empty?
+
   warnings.each do |w|
     text = "#{linter}: #{w['message']} in `#{w['path']}:#{w['line']}`"
     if w['level'] = 'W'
@@ -139,6 +143,7 @@ ENV['PATH'] = "#{`npm bin`.strip}:#{ENV['PATH']}"
     end
   end
 end
+message "Linters #{linters_no_errors.join(', ')} reported no errors"
 
 
 # Ask for reviews in slack
@@ -149,7 +154,7 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
     message "Can't find issue #{issue_number}"
   else
     markdown "Issue https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})"
-    unless is_wip || $had_big_fail || tests_failed || github.pr_labels =~ /review requested/i
+    unless is_wip || $had_big_fail || tests_failed || !!(github.pr_labels.join =~ /review requested/i)
       pr_url = github.pr_json['html_url']
       github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
       payload = {
