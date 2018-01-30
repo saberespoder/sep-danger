@@ -1,5 +1,5 @@
 module Sep
   module Danger
-    VERSION = '0.1.5'
+    VERSION = '0.2.1'
   end
 end
