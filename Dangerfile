@@ -2,6 +2,7 @@
 
 # Helpers
 require "json"
+require "shellwords"
 
 ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
 
@@ -164,7 +165,7 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
                "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})",
                "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"].join("\n")
       }
-      system("curl -X POST --data-urlencode 'payload=#{payload.to_json}' '#{ENV["SLACK_REVIEW_WEBHOOK"]}'")
+      system("curl -X POST --data-urlencode payload=#{payload.to_json.shellescape} '#{ENV["SLACK_REVIEW_WEBHOOK"]}'")
     end
   end
 end
