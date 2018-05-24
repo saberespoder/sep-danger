@@ -23,9 +23,6 @@ warn("PR is classed as Work in Progress") if is_wip
 # Warn when there is a big PR
 warn("Big PR") if git.lines_of_code > 400
 
-# PR needs rebasing
-big_fail("PR can't be merged yet, rebase needed") unless github.pr_json["mergeable"]
-
 # Don't let testing shortcuts get into master by accident
 big_fail("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
 big_fail("fit left in tests") if `grep -r fit spec/ `.length > 1
@@ -133,7 +130,7 @@ linters.each do |linter|
     next
   end
 
-  linters_no_errors.delete(linter) if warnings.empty?
+  linters_no_errors.delete(linter) unless warnings.empty?
 
   warnings.each do |w|
     text = "#{linter}: #{w['message']} in `#{w['path']}:#{w['line']}`"
@@ -144,7 +141,7 @@ linters.each do |linter|
     end
   end
 end
-message "Linters #{linters_no_errors.join(', ')} reported no errors"
+message "Linters #{linters_no_errors.join(', ')} reported no errors" unless linters_no_errors.empty?
 
 
 # Ask for reviews in slack
