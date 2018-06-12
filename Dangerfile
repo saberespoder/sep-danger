@@ -147,7 +147,7 @@ linters.each do |linter|
 end
 message "Linters #{linters_no_errors.join(', ')} reported no errors" unless linters_no_errors.empty?
 
-author_github_usermane = github.pr_author
+author_github_username = github.pr_author
 author_slack_username = DEVS[author_github_username]
 
 if issue_number = github.branch_for_head[/^(\d+)_/, 1]
