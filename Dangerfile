@@ -5,6 +5,10 @@ require "json"
 require "shellwords"
 
 ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
+DEVS = { # github username => slack username
+  dvdbng: 'david',
+  :'query-string': 'alex'
+}
 
 $had_big_fail = false
 def big_fail(message)
@@ -143,6 +147,8 @@ linters.each do |linter|
 end
 message "Linters #{linters_no_errors.join(', ')} reported no errors" unless linters_no_errors.empty?
 
+author_github_usermane = github.pr_author
+author_slack_username = DEVS[author_github_username]
 
 # Ask for reviews in slack
 if issue_number = github.branch_for_head[/^(\d+)_/, 1]
@@ -155,10 +161,12 @@ if issue_number = github.branch_for_head[/^(\d+)_/, 1]
     unless is_wip || $had_big_fail || tests_failed || !!(github.pr_labels.join =~ /review requested/i)
       pr_url = github.pr_json['html_url']
       github.api.add_labels_to_an_issue(pr_url.split('/')[3..4].join('/'), pr_url.split('/')[6], ['review requested'])
+      reviewers = (DEVS.values - [author_slack_username]).map { |username| "@#{username}" }.join(' ')
       payload = {
         username: 'Review bot',
         link_names: 1,
-        text: ["@here Review time!",
+        icon_emoji: ":reviewbot-#{author_slack_username}:",
+        text: ["#{reviewers} Review time!",
                "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})",
                "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"].join("\n")
       }
