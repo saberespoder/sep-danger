@@ -6,8 +6,8 @@ require "shellwords"
 
 ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
 DEVS = { # github username => slack username
-  :dvdbng => 'david',
-  :'query-string' => 'alex'
+  'dvdbng' => 'david',
+  'query-string' => 'alex'
 }
 
 $had_big_fail = false
@@ -167,7 +167,7 @@ unless is_wip || $had_big_fail || tests_failed || !!(github.pr_labels.join =~ /r
   reviewers = (DEVS.values - [author_slack_username]).map { |username| "@#{username}" }.join(' ')
 
   text = []
-  text << "#{reviewers} New Pull Request by #{author_slack_username.capitalize}"
+  text << "#{reviewers} New Pull Request by #{(author_slack_username || 'unknown').capitalize}"
   text << "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})" if issue_title
   text << "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"
 
