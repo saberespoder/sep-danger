@@ -6,8 +6,8 @@ require "shellwords"
 
 ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
 DEVS = { # github username => slack username
-  dvdbng: 'david',
-  :'query-string': 'alex'
+  :dvdbng => 'david',
+  :'query-string' => 'alex'
 }
 
 $had_big_fail = false
