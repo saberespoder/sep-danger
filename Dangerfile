@@ -101,14 +101,25 @@ end
 
 # Report failed tests
 tests_failed = false
-rspec_report = File.join(ENV.fetch('CIRCLE_TEST_REPORTS', '.'), 'rspec/rspec.xml')
-if File.exist?(rspec_report)
+rspec_report_path = File.join(ENV.fetch('CIRCLE_TEST_REPORTS', '.'), 'rspec/rspec*.xml')
+rspec_reports = Dir.glob(rspec_report_path)
+test_count = 0
+fail_count = 0
+skip_count = 0
+
+rspec_reports.each do |rspec_report|
   junit.parse rspec_report
   junit.report
-  tests_failed = junit.failures.length > 0
-  message "Rspec: #{junit.tests.length} examples, #{junit.failures.length} failures, #{junit.skipped.length} skipped"
+  tests_failed ||= junit.failures.length > 0
+  test_count += junit.tests.length
+  fail_count += junit.failures.length
+  skip_count += junit.skipped.length
+end
+
+if rspec_reports.empty?
+  warn "junit file not found in #{rspec_reports_path}"
 else
-  warn "junit file not found in #{rspec_report}"
+  message "Rspec: #{test_count} examples, #{fail_count} failures, #{skip_count} skipped"
 end
 
 # Setup environment for the linters (copy configs, etc)
