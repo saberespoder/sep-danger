@@ -58,9 +58,9 @@ if added_lines =~ /\bdefault_scope\b/
 end
 
 # We want to merge to master only from release branches
-if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?('release_') || github.branch_for_head.start_with?('asap'))
-  fail 'Your trying to rebase into MASTER from non-release branch'
-end
+# if github.branch_for_base.eql?('master') && !(github.branch_for_head.start_with?('release_') || github.branch_for_head.start_with?('asap'))
+#   fail 'Your trying to rebase into MASTER from non-release branch'
+# end
 
 # Warn if 'Gemfile' was modified and 'Gemfile.lock' was not
 if git.modified_files.include?("Gemfile") && !git.modified_files.include?("Gemfile.lock")
