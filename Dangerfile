@@ -6,8 +6,8 @@ require "shellwords"
 
 ISSUES_REPO = ENV.fetch('DANGER_ISSUES_REPO', 'saberespoder/inboundsms').freeze
 DEVS = { # github username => slack username
-  :dvdbng => 'david',
-  :'query-string' => 'alex'
+  'dvdbng' => 'david',
+  'query-string' => 'alex'
 }
 
 $had_big_fail = false
@@ -147,7 +147,7 @@ linters.each do |linter|
 end
 message "Linters #{linters_no_errors.join(', ')} reported no errors" unless linters_no_errors.empty?
 
-author_github_usermane = github.pr_author
+author_github_username = github.pr_author
 author_slack_username = DEVS[author_github_username]
 
 if issue_number = github.branch_for_head[/^(\d+)_/, 1]
@@ -167,7 +167,7 @@ unless is_wip || $had_big_fail || tests_failed || !!(github.pr_labels.join =~ /r
   reviewers = (DEVS.values - [author_slack_username]).map { |username| "@#{username}" }.join(' ')
 
   text = []
-  text << "#{reviewers} New Pull Request by #{author_slack_username.capitalize}"
+  text << "#{reviewers} New Pull Request by #{(author_slack_username || 'unknown').capitalize}"
   text << "Issue: https://github.com/#{ISSUES_REPO}/issues/#{issue_number} (#{issue_title})" if issue_title
   text << "PR: #{github.pr_json["html_url"]} (#{github.pr_title})"
 
