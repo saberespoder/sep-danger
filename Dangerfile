@@ -42,7 +42,7 @@ warn "Specs are testing implementation - receive(:something) is used"    if adde
 # We don't need any debugging code in our codebase
 warn "Debugging code found - puts" if added_lines =~ /^.\s*puts\b/
 big_fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ spec/`.length > 1
-big_fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
+# big_fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
 big_fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
 big_fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
 big_fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
