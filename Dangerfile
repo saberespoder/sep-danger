@@ -28,8 +28,8 @@ warn("PR is classed as Work in Progress") if is_wip
 warn("Big PR") if git.lines_of_code > 400
 
 # Don't let testing shortcuts get into master by accident
-big_fail("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
-big_fail("fit left in tests") if `grep -r fit spec/ `.length > 1
+big_fail("fdescribe left in tests") if `grep -r -P '^\s+fdescribe' spec/`.length > 1
+big_fail("fit left in tests") if `grep -r -P '^\s+fit ' spec/`.length > 1
 
 # Mainly to encourage writing up some reasoning about the PR
 fail "Please provide a summary in the Pull Request description" if github.pr_body.length < 5
