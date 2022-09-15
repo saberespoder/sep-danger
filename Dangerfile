@@ -45,7 +45,7 @@ big_fail "Debugging code found - binding.pry" if `grep -r binding.pry lib/ app/ 
 # big_fail "Debugging code found - p" if added_lines =~ /^.\s*p\b/
 big_fail "Debugging code found - pp" if added_lines =~ /^.\s*pp\b/
 big_fail "Debugging code found - debugger" if `grep -r debugger lib/ app/ spec/`.length > 1
-big_fail "Debugging code found - console.log" if `grep -r console.log lib/ app/ spec/`.length > 1
+big_fail "Debugging code found - console.log" if `grep -r 'console\.log' lib/ app/ spec/`.length > 1
 big_fail "Debugging code found - require 'debug'" if `grep -r "require \'debug\'" lib/ app/ spec/`.length > 1
 
 # White space conventions
